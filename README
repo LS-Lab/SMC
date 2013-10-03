@@ -1,0 +1,115 @@
+*******************
+**** SMC / MDP ****
+*******************
+
+This text file contains instructions on how to build and run the Statistical Model Checking for Markov Decisions Processes software.
+
+You may build with Eclipse or without Eclipse.
+
+In the following, we will refer to / as the base directory into which the archive was decompressed. It should contain a "src" folder, along with many ".sh" files.
+
+****************************
+**** BUILD WITH ECLIPSE ****
+****************************
+
+Requisites:
+1) PRISM, version 4.0.2 was used (http://www.prismmodelchecker.org/)
+2) Scala, version 2.9.1 was used (http://www.scala-lang.org/)
+3) SSJ, version 2.4 was used (http://www.iro.umontreal.ca/~simardr/ssj/indexe.html)
+
+
+This guide will focus on getting the software running within an Eclipse project for ease of modification. It can be somewhat easier to simply use the including script files, but it will then be harder to modify the code.
+
+The main folder / should serve as the base directory for the project, with /src/ being the source folder and /bin/ being the binary folder.
+
+
+(1) Compile PRISM
+
+  Please follow PRISM's instructions for compiling it for your machine. The result will be the PRISM native library. We will also need to perform some minimal changes to PRISM's source Java code which are crucial for efficiency. PRISM's location is irrelevant.
+
+To include the PRISM Java sources inside the Eclipse project:
+ - Go to the project's properties
+ - Click on Java Build Path
+ - Click on Add Folder
+ - Find and select PRISM's Java source folder (typically PRISM_folder/src/)
+
+  You will then need to add PRISM's dependencies to the project, which can be found inside the PRISM_folder/lib/ folder (namely colt.jar, epsgraphics.jar, jcommon.jar, jfreechart.jar and pepa.jar to remove all compile errors). To do this, also in the Java Build Path panel, click "Add External JARs…".
+
+  The most important change is to find PRISM/src/parser/State.java and change the original public int hashCode()'s method body to:
+
+return varValues.length > 0 ? Arrays.deepHashCode(varValues) : 0;
+
+  This allows states to be efficiently stored and accessed within a hash table.
+
+(2) Compile Scala formula parser
+
+Please add the Scala libraries to your Eclipse project (i.e. Scala_folder/lib/scala-library.jar). Alternatively, install Scala for Eclipse and use the "Add Library" button in the Java Build Path panel.
+
+  The compilation of the Scala formula parser is not automated through Eclipse. To compile it, proceed as follows:
+ - Add /scalabin/ as a class folder to the project. If it doesn't exist, create it.
+ - Open /src/compileSat.sh. This file compiles not only the Scala parser, but also the entire project.
+ - Change all the paths to match the location of the libraries in your system.
+
+  You can either run the first two lines to compile the Scala formula parser and populate the /scalabin/ folder, or you can run the entire file to compile the formula parser and the SMC/MDP code.
+
+
+(3) Compile SMC/MDP
+
+  At this point, PRISM should be successfully compiled within the /bin/ folder and the Scala parser should be within /scalabin/. The SMC/MDP code should still have a few errors. Please add the SSJ and dependencies to the project (ssj.jar, colt.jar, optimization.jar).
+
+  If Eclipse still identifies errors, they are likely due to the visibility of some of PRISM's methods. Find their location and change them to public.
+
+  Eclipse should now successfully compile the PRISM modified source code and SMC/MDP code! It is ready to use! :)
+
+  To clean SMC/MDP binaries, simply run /clean.sh form the main directory. Don't forget you can also use the /src/compileSat.sh script to compile the entire project (it only assumes you have PRISM's binaries within the /bin/ folder).
+
+
+*******************************
+**** BUILD WITHOUT ECLIPSE ****
+*******************************
+
+Requisites:
+1) PRISM, version 4.0.2 was used (http://www.prismmodelchecker.org/)
+2) Scala, version 2.9.1 was used (http://www.scala-lang.org/)
+3) SSJ, version 2.4 was used (http://www.iro.umontreal.ca/~simardr/ssj/indexe.html)
+
+This method is suggested if you are more comfortable with the command line, or if you have to get SMC/MDP working on a remote server.
+
+The main folder / should serve as the base directory, with /src/ containing SMC/MDP sources.
+
+
+(1) Compile PRISM
+
+  Please follow PRISM's instructions for compiling it for your machine. The result will be the PRISM native library. We will also need to perform some minimal changes to PRISM's source Java code which are crucial for efficiency. PRISM's location is irrelevant. The Java binaries, however, will need to be copied into /bin/.
+
+  The most important change is to find PRISM/src/parser/State.java and change the original public int hashCode()'s method body to:
+
+return varValues.length > 0 ? Arrays.deepHashCode(varValues) : 0;
+
+  This allows states to be efficiently stored and accessed within a hash table. You will also have to change certain method's visibility, recompile, and copy the binaries to /bin/.
+
+(2) Compile Scala formula parser and SMC/MDP
+
+  Simply follow these steps:
+ - Open /src/compileSat.sh. This file compiles not only the Scala parser, but also the entire project.
+ - Change all the paths to match the location of the libraries in your system.
+ - Run the /src/compileSat.sh to compile the formula parser and the SMC/MDP code into their respective directories (/scalabin/ and /bin/ respectively).
+ - To clean SMC/MDP binaries, simply run /clean.sh form the main directory.
+
+
+*************
+**** RUN ****
+*************
+
+  There are two files in the main folder /, namely /run.sh and /rungc.sh. The only difference is that /rungc.sh gives the JVM some garbage collection options related to using multiple cores.
+
+  You will need to change the locations of the libraries from /run.sh and /rungc.sh like you did with /compileSat.sh. To run, simply use "sh run.sh" and have fun tweaking the millions of options! :)
+
+  In the main folder you will find many files. The .sh files are mostly the tests we used throughout our research to get results. Only a subset of them were used for the results in final paper.
+
+  The .nm files are PRISM's models, sometimes with minimal changes from their original version. Similarly, the .pctl files are the PRISM formula files, and the .fm files are their SMC/MDP counterparts.
+
+  Within various folders inside /, you will find the results of the runs used for the paper. Some were used, and some were not. Most of these folders include some Python scripts to aggregate the information for the final results.
+
+
+

@@ -1,0 +1,7 @@
+SRC=./src
+BIN=./bin
+PRISM_PATH=/Users/jmartins/tools/prism-4.0.2-src
+SCALA_PATH=/Users/jmartins/tools/scala-2.9.1.final
+SSJ_PATH=/Users/jmartins/tools/lib/
+COLT_PATH=/Users/jmartins/tools/lib/
+OPTIMIZATION_PATH=/Users/jmartins/tools/lib/
